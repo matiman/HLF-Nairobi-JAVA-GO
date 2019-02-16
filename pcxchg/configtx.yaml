@@ -1,0 +1,202 @@
+Organizations:
+    - &OrdererOrg
+        Name: OrdererOrg
+        ID: OrdererMSP
+        MSPDir: crypto-config/ordererOrganizations/pcxchg.com/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('OrdererMSP.admin')"
+
+    - &Amazon
+        Name: AmazonMSP
+        ID: AmazonMSP
+        MSPDir: crypto-config/peerOrganizations/Amazon.com/msp
+        AnchorPeers:
+            - Host: peer0.Amazon.com
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('AmazonMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('AmazonMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('AmazonMSP.admin')"
+
+    - &Asus
+        Name: AsusMSP
+        ID: AsusMSP
+
+        MSPDir: crypto-config/peerOrganizations/Asus.com/msp
+
+        AnchorPeers:
+            - Host: peer0.Asus.com
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('AsusMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('AsusMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('AsusMSP.admin')"
+
+    - &Dell
+        Name: DellMSP
+        ID: DellMSP
+
+        MSPDir: crypto-config/peerOrganizations/Dell.com/msp
+
+        AnchorPeers:
+            - Host: peer0.Dell.com
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('DellMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('DellMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('DellMSP.admin')"
+
+    - &HP
+        Name: HPMSP
+        ID: HPMSP
+        MSPDir: crypto-config/peerOrganizations/HP.com/msp
+        AnchorPeers:
+            - Host: peer0.HP.com
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('HPMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('HPMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('HPMSP.admin')"
+
+Capabilities:
+    Global: &ChannelCapabilities
+        V1_1: true
+    Orderer: &OrdererCapabilities
+        V1_1: true
+    Application: &ApplicationCapabilities
+        V1_2: true
+
+Application: &ApplicationDefaults
+    Policies: &ApplicationDefaultPolicies
+            Readers:
+                Type: ImplicitMeta
+                Rule: "ANY Readers"
+            Writers:
+                Type: ImplicitMeta
+                Rule: "ANY Writers"
+            Admins:
+                Type: ImplicitMeta
+                Rule: "MAJORITY Admins"
+    Organizations:
+
+Orderer: &OrdererDefaults
+    OrdererType: solo
+    Addresses:
+        - orderer.pcxchg.com:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+    Policies:
+        # Who may invoke the 'Deliver' API
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        # Who may invoke the 'Broadcast' API
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        # By default, who may modify elements at this config level
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+Profiles:
+    PCXCHGOrdererGenesis:
+        <<: *ChannelDefaults
+        Capabilities:
+            <<: *ChannelCapabilities
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Consortiums:
+            PCXCHG:
+                Organizations:
+                    - *Amazon
+                    - *Asus
+                    - *Dell
+                    - *HP
+
+    AsusChannel:
+        <<: *ChannelDefaults
+        Consortium: PCXCHG
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Amazon
+                - *Asus
+            Capabilities:
+                <<: *ApplicationCapabilities
+    DellChannel:
+        <<: *ChannelDefaults
+        Consortium: PCXCHG
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Amazon
+                - *Dell
+            Capabilities:
+                <<: *ApplicationCapabilities
+    HPChannel:
+        <<: *ChannelDefaults
+        Consortium: PCXCHG
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Amazon
+                - *HP
+            Capabilities:
+                <<: *ApplicationCapabilities
+                

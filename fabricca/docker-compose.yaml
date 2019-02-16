@@ -1,0 +1,33 @@
+version: '2'
+
+networks:
+  pcxchg:
+
+services:
+  fabriccaserver:
+     image: hyperledger/fabric-ca:1.2.0
+     container_name: fabriccaserver
+     ports:
+       - 7054:7054
+     environment:
+       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+     volumes:
+       - ./fabric-ca-server:/etc/hyperledger/fabric-ca-server
+     command: sh -c 'fabric-ca-server start -b admin:adminpw'
+     networks:
+      - pcxchg
+
+  admin-client:
+     tty: true
+     image: hyperledger/fabric-ca:1.2.0
+     container_name: admin-client
+     environment:
+       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-client
+       - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+     volumes:
+       - ./fabric-ca-client:/etc/hyperledger/fabric-ca-client
+     depends_on:
+       - fabriccaserver
+     command: sh -c 'sleep 5;fabric-ca-client enroll -u http://admin:adminpw@fabriccaserver:7054;sleep 10000'
+     networks:
+      - pcxchg

@@ -1,0 +1,193 @@
+version: '2'
+
+networks:
+  pcxchg:
+
+services:
+  orderer.pcxchg.com:
+    image: hyperledger/fabric-orderer:1.2.0
+    container_name: orderer.pcxchg.com
+    environment:
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+    volumes:
+      - ./orderer/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+      - ./crypto-config/ordererOrganizations/pcxchg.com/orderers/orderer.pcxchg.com/msp:/var/hyperledger/orderer/msp
+    command: orderer
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    ports:
+      - 7050:7050
+    networks:
+      - pcxchg
+
+  peer0.Asus.com:
+    container_name: peer0.Asus.com
+    extends:
+      file: ./peer.yaml
+      service: peer
+    environment:
+      - CORE_PEER_ID=peer0.Asus.com
+      - CORE_PEER_ADDRESS=peer0.Asus.com:7051
+      - CORE_PEER_LOCALMSPID=AsusMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.Asus.com:7051
+    volumes:
+      - ./crypto-config/peerOrganizations/Asus.com/peers/peer0.Asus.com/msp:/etc/hyperledger/msp/peer
+    ports:
+      - 7051:7051
+      - 7053:7053
+    depends_on:
+      - orderer.pcxchg.com
+    networks:
+      - pcxchg
+
+  peer0.Dell.com:
+    container_name: peer0.Dell.com
+    extends:
+      file: ./peer.yaml
+      service: peer
+    environment:
+      - CORE_PEER_ID=peer0.Dell.com
+      - CORE_PEER_ADDRESS=peer0.Dell.com:7051
+      - CORE_PEER_LOCALMSPID=DellMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.Dell.com:7051
+    volumes:
+      - ./crypto-config/peerOrganizations/Dell.com/peers/peer0.Dell.com/msp:/etc/hyperledger/msp/peer
+    ports:
+      - 10051:7051
+      - 10053:7053
+    depends_on:
+      - orderer.pcxchg.com
+    networks:
+      - pcxchg
+
+  peer0.HP.com:
+    container_name: peer0.HP.com
+    extends:
+      file: ./peer.yaml
+      service: peer
+    environment:
+      - CORE_PEER_ID=peer0.HP.com
+      - CORE_PEER_ADDRESS=peer0.HP.com:7051
+      - CORE_PEER_LOCALMSPID=HPMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.HP.com:7051
+    volumes:
+      - ./crypto-config/peerOrganizations/HP.com/peers/peer0.HP.com/msp:/etc/hyperledger/msp/peer
+    ports:
+      - 9051:7051
+      - 9053:7053
+    depends_on:
+      - orderer.pcxchg.com
+    networks:
+      - pcxchg
+      
+  peer0.Amazon.com:
+    container_name: peer0.Amazon.com
+    extends:
+      file: ./peer.yaml
+      service: peer
+    environment:
+      - CORE_PEER_ID=peer0.Amazon.com
+      - CORE_PEER_ADDRESS=peer0.Amazon.com:7051
+      - CORE_PEER_LOCALMSPID=AmazonMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/peer/
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.Amazon.com:7051
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdbAmazon:5984
+    volumes:
+      - ./crypto-config/peerOrganizations/Amazon.com/peers/peer0.Amazon.com/msp:/etc/hyperledger/msp/peer
+    ports:
+      - 8051:7051
+      - 8053:7053
+    depends_on:
+      - orderer.pcxchg.com
+      - couchdbAmazon
+    networks:
+      - pcxchg
+
+  cli.Asus:
+    extends:
+      file: ./cli.yaml
+      service: cli
+    container_name: cli.Asus
+    environment:
+      - CORE_PEER_ID=cli.Asus.com
+      - CORE_PEER_ADDRESS=peer0.Asus.com:7051
+      - CORE_PEER_LOCALMSPID=AsusMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@Asus.com/msp
+    volumes:
+      - ./crypto-config/peerOrganizations/Asus.com:/etc/hyperledger/msp
+    depends_on:
+      - orderer.pcxchg.com
+      - peer0.Asus.com
+    networks:
+      - pcxchg
+
+  cli.Dell:
+    extends:
+      file: ./cli.yaml
+      service: cli
+    container_name: cli.Dell
+    environment:
+      - CORE_PEER_ID=cli.Dell.com
+      - CORE_PEER_ADDRESS=peer0.Dell.com:7051
+      - CORE_PEER_LOCALMSPID=DellMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@Dell.com/msp
+    volumes:
+      - ./crypto-config/peerOrganizations/Dell.com:/etc/hyperledger/msp
+    depends_on:
+      - orderer.pcxchg.com
+      - peer0.Dell.com
+    networks:
+      - pcxchg
+
+  cli.HP:
+    extends:
+      file: ./cli.yaml
+      service: cli
+    container_name: cli.HP
+    environment:
+      - CORE_PEER_ID=cli.HP.com
+      - CORE_PEER_ADDRESS=peer0.HP.com:7051
+      - CORE_PEER_LOCALMSPID=HPMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@HP.com/msp
+    volumes:
+      - ./crypto-config/peerOrganizations/HP.com:/etc/hyperledger/msp
+    depends_on:
+      - orderer.pcxchg.com
+      - peer0.HP.com
+    networks:
+      - pcxchg
+
+  cli.Amazon:
+    extends:
+      file: ./cli.yaml
+      service: cli
+    container_name: cli.Amazon
+    environment:
+      - CORE_PEER_ID=cli.Amazon.com
+      - CORE_PEER_ADDRESS=peer0.Amazon.com:7051
+      - CORE_PEER_LOCALMSPID=AmazonMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@Amazon.com/msp
+    volumes:
+      - ./crypto-config/peerOrganizations/Amazon.com:/etc/hyperledger/msp
+    depends_on:
+      - peer0.Amazon.com
+    networks:
+      - pcxchg
+
+
+  couchdbAmazon:
+    container_name: couchdbAmazon
+    image: hyperledger/fabric-couchdb
+    environment:
+      DB_URL: http://localhost:5984/
+    ports:
+      - "5984:5984"
+    networks:
+      - pcxchg

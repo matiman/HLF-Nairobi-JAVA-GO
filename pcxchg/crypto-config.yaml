@@ -1,0 +1,35 @@
+OrdererOrgs:
+  - Name: Orderer
+    Domain: pcxchg.com
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer
+PeerOrgs:
+  - Name: Asus
+    Domain: Asus.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+  - Name: Amazon
+    Domain: Amazon.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+  - Name: Dell
+    Domain: Dell.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
+  - Name: HP
+    Domain: HP.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1
