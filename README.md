@@ -1,4 +1,4 @@
-# HLF-Nairobi-JAVA-GO
+# HLF-JAVA-GO
 
 This is a simple use case with 3 manufacturers selling on Amazon. 
 
