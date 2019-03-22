@@ -1,0 +1,7 @@
+### If you encounter an error when trying to start docker-compose, kill prev containers using
+
+docker kill $(docker ps -q)
+docker rm $(docker ps -aq)
+
+===== Don't use this unless when extremely necessary =====
+docker rmi $(docker images dev-* -q)
