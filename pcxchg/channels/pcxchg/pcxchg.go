@@ -1,5 +1,7 @@
+// part 1 - package declaration
 package main
 
+// part 2 - import declaration
 import (
     "fmt"
     "github.com/hyperledger/fabric/core/chaincode/shim"
@@ -11,6 +13,7 @@ import (
 type PcXchg struct {
 }
 
+// chaincode datatype
 // Define our struct to store PCs in Blockchain, start fields upper case for JSON
 type PC struct {
     Snumber string  // This one will be our key

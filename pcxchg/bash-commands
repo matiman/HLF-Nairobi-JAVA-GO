@@ -30,6 +30,12 @@ docker exec cli.HP bash -c 'peer channel join -b hp.block'
 docker exec cli.Dell bash -c 'peer channel join -b dell.block'
 
 ### Make channel update to each seller
+=== start error ====
+docker exec cli.Asus bash -c 'peer channel update -o orderer.pcxchg.com:7050 -c asus -f ./channels/asusanchor.tx' -v 0
+2019-03-23 09:11:54.919 UTC [channelCmd] InitCmdFactory -> INFO 001 Endorser and orderer connections initialized
+Error: got unexpected status: BAD_REQUEST -- error authorizing update: error validating ReadSet: readset expected key [Group]  /Channel/Application/AsusMSP at version 0, but got version 1
+=== end error ===
+
 docker exec cli.Asus bash -c 'peer channel update -o orderer.pcxchg.com:7050 -c asus -f ./channels/asusanchor.tx'
 
 docker exec cli.Dell bash -c 'peer channel update -o orderer.pcxchg.com:7050 -c dell -f ./channels/dellanchor.tx'
@@ -61,13 +67,20 @@ docker exec cli.Asus bash -c "peer chaincode invoke -C asus -n pcxchg -c '{\"Arg
 
 docker exec cli.HP bash -c "peer chaincode invoke -C hp -n pcxchg -c '{\"Args\":[\"createPC\", \"HP001\", \"foo\", \"bar\"]}'"
 docker exec cli.HP bash -c "peer chaincode invoke -C hp -n pcxchg -c '{\"Args\":[\"createPC\", \"HP002\", \"foo\", \"bar\"]}'"
+docker exec cli.HP bash -c "peer chaincode invoke -C hp -n pcxchg -c '{\"Args\":[\"createPC\", \"HP010\", \"HP\", \"X\"]}'"
+docker exec cli.HP bash -c "peer chaincode invoke -C hp -n pcxchg -c '{\"Args\":[\"createPC\", \"HP011\", \"HP\", \"Y\"]}'"
 
 docker exec cli.Dell bash -c "peer chaincode invoke -C dell -n pcxchg -c '{\"Args\":[\"createPC\", \"Dell001\", \"foo\", \"bar\"]}'"
 docker exec cli.Dell bash -c "peer chaincode invoke -C dell -n pcxchg -c '{\"Args\":[\"createPC\", \"Dell002\", \"foo\", \"bar\"]}'"
 docker exec cli.Dell bash -c "peer chaincode invoke -C dell -n pcxchg -c '{\"Args\":[\"createPC\", \"Dell003\", \"foo\", \"bar\"]}'"
 docker exec cli.Dell bash -c "peer chaincode invoke -C dell -n pcxchg -c '{\"Args\":[\"createPC\", \"Dell004\", \"foo\", \"bar\"]}'"
+docker exec cli.Dell bash -c "peer chaincode invoke -C dell -n pcxchg -c '{\"Args\":[\"createPC\", \"Dell005\", \"Dell\", \"XPS\"]}'"
 
 ### Confirm entries made on each channel
+=== start error for hp query ===
+ docker exec cli.Amazon bash -c "peer chaincode query -C hp -n pcxchg -c '{\"Args\":[\"queryStock\"]}'"
+Error: error endorsing query: rpc error: code = Unknown desc = access denied: channel [hp] creator org [AmazonMSP] - proposal response: <nil>
+=== end error ===
 docker exec cli.Amazon bash -c "peer chaincode query -C asus -n pcxchg -c '{\"Args\":[\"queryStock\"]}'"
 docker exec cli.Amazon bash -c "peer chaincode query -C hp -n pcxchg -c '{\"Args\":[\"queryStock\"]}'"
 docker exec cli.Amazon bash -c "peer chaincode query -C dell -n pcxchg -c '{\"Args\":[\"queryStock\"]}'"
@@ -75,12 +88,10 @@ docker exec cli.Amazon bash -c "peer chaincode query -C dell -n pcxchg -c '{\"Ar
 ### making a transaction
 docker exec cli.Amazon bash -c "peer chaincode invoke -C dell -n pcxchg -c '{\"Args\":[\"buyPC\", \"Dell004\"]}'"
 
-### Confirm specific details of an entry made
-docker exec cli.Amazon bash -c "peer chaincode query -C asus -n pcxchg -c '{\"Args\":[\"queryDetail\", \"Asus003\"]}'"
-
 ### Make individual transactions
 docker exec cli.Amazon bash -c "peer chaincode invoke -C asus -n pcxchg -c '{\"Args\":[\"buyPC\", \"Asus003\"]}'"
 
 docker exec cli.Amazon bash -c "peer chaincode invoke -C asus -n pcxchg -c '{\"Args\":[\"handBackPC\", \"Asus003\"]}'"  
 
-docker exec cli.Amazon bash -c "peer chaincode invoke -C dell -n pcxchg -c '{\"Args\":[\"buyPC\", \"Dell004\"]}'"
+### Confirm specific details of an entry made
+docker exec cli.Amazon bash -c "peer chaincode query -C asus -n pcxchg -c '{\"Args\":[\"queryDetail\", \"Asus003\"]}'"
